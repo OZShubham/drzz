@@ -1,0 +1,147 @@
+/* Reset default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Navigation bar */
+.navbar {
+  background-color: #333;
+  color: white;
+  border-bottom: 1px solid #444;
+}
+
+.navbar-brand {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+
+
+
+.nav-link {
+  color: #fffdfd !important;
+  font-weight: bold !important;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #ffc107;
+}
+/* Container styles */
+.container {
+  padding: 20px;
+}
+
+/* Form box styles */
+.form-box {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Default styles for larger screens */
+.product-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.product img {
+  max-width: 39%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.product h2 {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+}
+
+.product a {
+  text-decoration: none; /* Remove underline from all links within .product */
+}
+
+
+
+.product p {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+/* Media query for tablets */
+@media (max-width: 992px) {
+  .product-container {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .product img {
+    max-height: 120px;
+  }
+
+  .product h2 {
+    font-size: 14px;
+  }
+
+  .product p {
+    font-size: 12px;
+  }
+}
+
+/* Media query for mobile devices */
+/* Media query for mobile devices */
+@media (max-width: 576px) {
+  .product-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .product {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .product img {
+    max-height: 100px;
+    margin-bottom: 10px; /* Add margin below the image */
+  }
+  .product a {
+    text-decoration: none; /* Remove underline from all links within .product */
+  }
+
+
+  .product h2 {
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    color: #333;
+    text-decoration: none; 
+}
+  .product p {
+    font-size: 12px;
+  }
+}
