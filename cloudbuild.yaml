@@ -15,4 +15,4 @@ steps:
       - 'drzz'
       - '--image=gcr.io/	gen-ai-app/drzz:$COMMIT_SHA'
       - '--platform=managed'
-      - '--region=asia-south1'
+      - '--region=asia-south1' 
