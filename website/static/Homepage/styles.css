@@ -162,7 +162,7 @@ body {
     font-weight: bold; /* Highlight the active link */
 }
 
-.product {
+/*.product {
     animation: pulse 2s infinite;
     
 }
@@ -177,7 +177,7 @@ body {
     100% {
         transform: scale(1);
     }
-}
+}*/
 .product:hover {
     background-color: #f5c0c0;
 }

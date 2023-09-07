@@ -135,7 +135,7 @@ body {
     margin-bottom: 10px;/* Adjust as needed */
 }
 
-.product {
+/*.product {
     animation: pulse 2s infinite;
     
 }
@@ -150,7 +150,7 @@ body {
     100% {
         transform: scale(1);
     }
-}
+}*/
 .product:hover {
     background-color: #f5c0c0;
 }
