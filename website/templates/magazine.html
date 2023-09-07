@@ -35,14 +35,15 @@
                             <a class="nav-link" href="{{ url_for('views.magazine') }}">Magazine</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('views.chathistory') }}">Fashion Advisor</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('views.marketing') }}">Marketing</a>
                         </li> 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('views.lookalike') }}">Look-Alike</a>
                           </li>
-                          <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('views.chathistory') }}">Fashion Advisor</a>
-                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Shop For
@@ -72,12 +73,8 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.signup') }}">Signup</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                        </li>
+                        
+                        
                     </ul>
                 </div>
             </div>
@@ -94,7 +91,7 @@
                 <div id="image-container" class="product-container">
                     <!-- Call the JavaScript function when the image is clicked -->
                     <a href="{{ url_for('views.magazines', magazine_id=1) }}">
-                        <img class="product-image" src="../static/magazinepage/image.png" alt="Product 1">
+                        <img class="product-image" src="../static/magazinepage/vogue magazine.jpg" alt="Product 1">
                     </a>
                     
                     
@@ -122,7 +119,7 @@
                 {% if articles %}
                     <!-- Display articles for a specific magazine -->
                     <!-- Display articles for a specific magazine -->
-                        <h1>Articles for Magazine {{ magazine_id }}</h1>
+                        <h5>Articles for Magazine {{ magazine_id }}</h5>
                         <ul>
                             {% for article in articles %}
                                 <li>
@@ -132,7 +129,7 @@
                         </ul>
 
                 {% else %}
-                    <h1>Welcome to the Magazine Page!</h1>
+                    <h5>Welcome to the Magazine Page!</h5>
                     <!-- Other content here -->
                 {% endif %}
             </div>

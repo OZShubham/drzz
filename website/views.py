@@ -1,5 +1,5 @@
 from flask import jsonify, request, render_template
-from flask import Blueprint, render_template, url_for, request, session, redirect, Flask, jsonify, flash
+from flask import Blueprint, render_template, url_for, request, session, redirect, Flask, jsonify, flash, make_response
 from google.cloud import datastore
 from google.cloud import vision_v1
 from google.cloud.vision_v1 import types
@@ -15,6 +15,7 @@ import google.generativeai as palm
 from google.cloud import storage
 from google.cloud import datastore
 import requests
+from typing import Sequence
 import re
 
 views = Blueprint('views', __name__)
@@ -24,7 +25,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/')
 def home():
-    return redirect('/homepage')
+    return redirect('/home')
 
 
 
@@ -45,7 +46,7 @@ def fetch_products(page, per_page):
 
 
 # Route to render HTML page and display products with pagination
-@views.route('/homepage')
+@views.route('/home')
 def homepage():
     page = request.args.get('page', default=1, type=int)  # Get the requested page number from the URL
     per_page = 8 # Number of products per page
@@ -104,6 +105,55 @@ def magazines(magazine_id):
     return render_template('magazine.html', articles=articles)
 
 
+# Initialize the Datastore client
+datastore_client = datastore.Client()
+
+# def fetchCustomerMetrics():
+#     try:
+#         customer_id = "C001"
+#         print(customer_id)
+#         if not customer_id:
+#             return 'Missing customerId parameter', 400
+
+#         query = datastore_client.query(kind='metric')  
+#         # Add a filter to fetch data specific to the provided customer ID
+#         query.add_filter('customer_id', '=', customer_id)
+
+#         entities = list(query.fetch())
+        
+#         return entities
+#     except Exception as e:
+#         return str(e), 500
+
+# def fetch_products_with_discount(discount_value):
+#     try:
+#         # Create a client to interact with Google Cloud Datastore
+#         client = datastore.Client()
+
+#         # Define the kind (entity type) in Datastore
+#         kind = "MasterData"
+
+#         # Define a query to filter products with a specific discount
+#         query = client.query(kind=kind)
+#         query.add_filter("discount", "=", str(discount_value))
+
+#         # Print the query being executed
+#         print(f"Executing query: {query}")
+
+#         # Execute the query and fetch matching products
+#         matching_products = list(query.fetch())
+
+#         # Print the number of matching products
+#         print(f"Found {len(matching_products)} matching products")
+
+#         return matching_products
+#     except Exception as e:
+#         print(f"Error fetching products: {str(e)}")
+#         return []
+
+
+
+    
 datastore_client= datastore.Client()
 @views.route('/marketing')
 def marketing():
@@ -130,13 +180,11 @@ def marketing():
         "location": "urban"
         }'''
         
-        # Generate a random discount percentage between 5% and 25%
-        discount = random.randint(1, 5) * 5
-        
         # Test POST request
         prompt = summary + f" Read the above passage and create a promotion advertisement banner text as one liner for the clothing, return the user data in JSON format like this."
         data = {"content": prompt}
-        print(discount)
+        
+        # json_metrics = fetchCustomerMetrics()
 
         response_post = requests.post(API_URL, json=data)
         if response_post.status_code == 200:
@@ -149,13 +197,11 @@ def marketing():
                 json_part = match.group(1)
                 text_part = match.group(2)
             
-            response = requests.get('https://full-iqcjxj5v4a-el.a.run.app/get_all_product')  # Replace with your actual API URL
-            # products = response.json()
             
-            products = response.json()
+            session['promo'] = text_part
            
           
-            return render_template('marketing.html', json_part=json_part,text_part=text_part,summary=summary,products=products[:3], discount=discount)
+            return render_template('marketing.html', json_part=json_part,text_part=text_part,summary=summary)
         
         else:
             print("POST Request Failed!")
@@ -185,7 +231,7 @@ def upload():
     flash('No File is Selected.', 'danger')
     return redirect('/lookalike')"""
 
-def analyze_image(image_file):
+"""def analyze_image(image_file):
     # Initialize the Vision API client
     client = vision_v1.ImageAnnotatorClient()
 
@@ -209,24 +255,197 @@ def analyze_image(image_file):
         "dominant_color": dominant_color
     }
 
-    return analysis_result
+    return analysis_result"""
 
-@views.route("/upload", methods=["POST"])
+
+
+'''from typing import Sequence
+
+from google.cloud import vision
+
+
+def analyze_image(
+    image_uri: str,
+    feature_types: Sequence,
+) -> vision.AnnotateImageResponse:
+    client = vision.ImageAnnotatorClient()
+
+    image = vision.Image()
+    image.source.image_uri = image_uri
+    features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
+    request = vision.AnnotateImageRequest(image=image, features=features)
+
+    response = client.annotate_image(request=request)
+   
+    return response
+
+
+
+def print_labels(response: vision.AnnotateImageResponse):
+    print("=" * 80)
+    for label in response.label_annotations:
+        print(
+            f"{label.score:4.0%}",
+            f"{label.description:5}",
+            sep=" | ",
+        )
+
+def print_objects(response: vision.AnnotateImageResponse):
+    print("=" * 80)
+    for obj in response.localized_object_annotations:
+        nvertices = obj.bounding_poly.normalized_vertices
+        print(
+            f"{obj.score:4.0%}",
+            f"{obj.name:15}",
+            f"{obj.mid:10}",
+            ",".join(f"({v.x:.1f},{v.y:.1f})" for v in nvertices),
+            sep=" | ",
+        )
+        
+image_uri = "gs://photodrzz/photo/13000072a.jpg"
+features = [
+    # vision.Feature.Type.OBJECT_LOCALIZATION,
+    # vision.Feature.Type.FACE_DETECTION,
+    # vision.Feature.Type.LANDMARK_DETECTION,
+    # vision.Feature.Type.LOGO_DETECTION,
+    # vision.Feature.Type.LABEL_DETECTION,
+    # vision.Feature.Type.TEXT_DETECTION,
+    # vision.Feature.Type.DOCUMENT_TEXT_DETECTION,
+    # vision.Feature.Type.SAFE_SEARCH_DETECTION,
+     #vision.Feature.Type.IMAGE_PROPERTIES,
+    # vision.Feature.Type.CROP_HINTS,
+     #vision.Feature.Type.WEB_DETECTION,
+     #vision.Feature.Type.PRODUCT_SEARCH,
+    # vision.Feature.Type.OBJECT_LOCALIZATION,
+]
+
+response = analyze_image(image_uri, features)
+
+
+image_uri = "gs://photodrzz/photo/-473Wx593H-443007260-pink-MODEl6.jpg"
+features = [vision.Feature.Type.OBJECT_LOCALIZATION]
+
+response = analyze_image(image_uri, features)
+
+
+
+
+from flask import Flask, request, render_template
+from google.cloud import vision
+from google.cloud import storage
+import tempfile
+
+# Initialize your Flask app
+app = Flask(__name__)
+
+# Define your Google Cloud Storage bucket name
+bucket_name = "uploaded-cloth"
+
+# Initialize the Google Cloud Storage client
+storage_client = storage.Client()
+
+# Your analyze_image and print_objects functions (as defined earlier)
+
+@views.route("/upload", methods=["GET", "POST"])
+def upload_image():
+    if request.method == "POST":
+        # Get the uploaded file
+        uploaded_file = request.files["file"]
+
+        if uploaded_file:
+            # Create a temporary file to store the uploaded image
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                uploaded_file.save(temp_file.name)
+            
+            # Upload the image to the Google Cloud Storage bucket
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(uploaded_file.filename)
+            blob.upload_from_filename(temp_file.name)
+
+            # Get the public URL of the uploaded image
+            image_uri = f"gs://{bucket_name}/{uploaded_file.filename}"
+
+            # Use the analyze_image function with the uploaded image URI
+            features = [vision.Feature.Type.OBJECT_LOCALIZATION]
+            response = analyze_image(image_uri, features)
+
+            # You can do something with the response here (e.g., print_objects)
+            # For example, print detected objects:
+            print_objects(response)
+
+            return jsonify(response)  # You'll need to import jsonify from flask
+
+
+    return render_template("upload.html")  # Create an HTML template for the upload page
+'''
+
+
+
+
+
+
+from flask import Flask, render_template, request, redirect, url_for
+from google.cloud import storage, vision
+from werkzeug.utils import secure_filename
+
+
+
+# Initialize the Google Cloud Storage client
+storage_client = storage.Client()
+bucket_name = 'uploaded-cloth'  # Replace with your GCS bucket name
+
+
+
+@views.route('/upload', methods=['POST'])
 def upload():
-    print("Analyzing image...")
-    if "file" not in request.files:
-        return jsonify({"error": "No file part"})
+    # Handle the uploaded image
+    uploaded_image = request.files['file']
+    if uploaded_image:
+        # Ensure the filename is secure (prevents directory traversal attacks)
+        filename = secure_filename(uploaded_image.filename)
+        # Upload the image to GCS
+        image_blob = upload_image_to_gcs(uploaded_image, filename)
+        # Analyze the image using its GCS URI
+        image_uri = f'gs://{bucket_name}/{image_blob.name}'
+        features = [vision.Feature.Type.WEB_DETECTION]
+        response = analyze_image_from_uri(image_uri, features)
+        original_image_url = image_blob.public_url
+        visually_similar_images = get_visual_similar_images(response)
+        return render_template('upload.html', original_image_url=original_image_url, visually_similar_images=visually_similar_images)
 
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "No selected file"})
+def upload_image_to_gcs(uploaded_image, filename):
+    # Create a blob in the GCS bucket with the provided filename
+    bucket = storage_client.bucket(bucket_name)
+    image_blob = bucket.blob(filename)
+    # Upload the image file to the blob
+    image_blob.upload_from_string(uploaded_image.read(), content_type=uploaded_image.content_type)
+    return image_blob
 
-    if file:
-        analysis_result = analyze_image(file)
-        return jsonify(analysis_result)
-    
-    print("Analysis results:", analysis_result)
-    return jsonify(analysis_result)
+def analyze_image_from_uri(image_uri: str, feature_types: list) -> vision.AnnotateImageResponse:
+    client = vision.ImageAnnotatorClient()
+    image = vision.Image()
+    image.source.image_uri = image_uri
+    features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
+    request = vision.AnnotateImageRequest(image=image, features=features)
+
+    response = client.annotate_image(request=request)
+    return response
+
+def get_visual_similar_images(response):
+    visually_similar_images = []
+    if response.web_detection and response.web_detection.visually_similar_images:
+        for image in response.web_detection.visually_similar_images:
+            visually_similar_images.append(image.url)
+          
+    return visually_similar_images[:4]
+
+
+
+
+
+
+
+
 
 def chat_summary():
 
@@ -264,8 +483,11 @@ def chathistory():
     else:
         summary = "chat on style me to see summary."    
     
-    products = session.get('products')
-    return render_template('chathistory.html', products=products, summary = summary)
+    if 'products' in session :
+        products = session.get('products')
+    else:
+        products = fetch_products_lookalike()
+    return render_template('chathistory.html', products=products[:3], summary = summary)
 
 def fetch_products_lookalike():
     response = requests.get('https://full-iqcjxj5v4a-el.a.run.app/get_all_product')
@@ -764,7 +986,70 @@ def submit_chat():
         print(response_post.text)
 
 
+@views.route('/promo_analysis', methods=['GET'])
+def promo_analysis():
 
+    promo = session.get('promo')
+
+    API_URL = "https://summary-gen-ai-api-hmvyexj3oa-el.a.run.app/summarize"
+
+    #return jsonify({"message": response_message})
+    sample = """
+    {
+        
+        "promotion tone": "friendly",
+        "emotion": "positive",
+        "season": "fall",
+        "occasion": "wedding"
+    }
+        """
+    # Test POST request
+    prompt = "You are the marketing campaign consultant, Review the following text in the triple quotes and give the tone, emotion ,season and occasion from the text and return the value as son attributes. for any missing value, mention as null  " + promo + "sample json like  " + sample
+    data = {"content": prompt}
+
+    response_post = requests.post(API_URL, json=data)
+    if response_post.status_code == 200:
+        response_data = response_post.json()
+        summary = response_data.get("summary", "No summary available.")
+        print(type(summary))
+
+    products = session.get('products')
+
+    return render_template('promo_analysis.html', text_part = promo, summary=summary ,products=products[:3])
 
      
+from typing import Sequence
 
+from google.cloud import vision
+
+
+def analyze_image_from_uri(
+    image_uri: str,
+    feature_types: Sequence,
+) -> vision.AnnotateImageResponse:
+    client = vision.ImageAnnotatorClient()
+
+    image = vision.Image()
+    image.source.image_uri = image_uri
+    features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
+    request = vision.AnnotateImageRequest(image=image, features=features)
+
+    response = client.annotate_image(request=request)
+
+    return response
+
+
+def print_labels(response: vision.AnnotateImageResponse):
+    print("=" * 80)
+    for label in response.label_annotations:
+        print(
+            f"{label.score:4.0%}",
+            f"{label.description:5}",
+            sep=" | ",
+        )
+
+image_uri = "gs://cloud-samples-data/vision/label/setagaya.jpeg"
+features = [vision.Feature.Type.LABEL_DETECTION]
+
+response = analyze_image_from_uri(image_uri, features)
+print_labels(response)
