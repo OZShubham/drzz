@@ -5,7 +5,7 @@ steps:
 
   # Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/	gen-ai-app/drzz:$COMMIT_SHA']
+    args: ['push', 'gcr.io/gen-ai-app/drzz:$COMMIT_SHA']
 
   # Deploy the Docker image to Google Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -13,6 +13,6 @@ steps:
       - 'run'
       - 'deploy'
       - 'drzz'
-      - '--image=gcr.io/	gen-ai-app/drzz:$COMMIT_SHA'
+      - '--image=gcr.io/gen-ai-app/drzz:$COMMIT_SHA'
       - '--platform=managed'
-      - '--region=asia-south1' 
+      - '--region=asia-south1'
